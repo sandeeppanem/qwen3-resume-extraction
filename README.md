@@ -3,6 +3,9 @@
 Fine-tune Qwen3-0.6B base model for resume parsing using LoRA (Low-Rank Adaptation).
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Model-yellow.svg)](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json)
+[![Hugging Face Datasets](https://img.shields.io/badge/🤗%20Datasets-Dataset-yellow.svg)](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k)
 
 ## 🚀 Model & Dataset Links
 
@@ -10,6 +13,25 @@ Fine-tune Qwen3-0.6B base model for resume parsing using LoRA (Low-Rank Adaptati
 - **Training Dataset**: [sandeeppanem/resume-json-extraction-5k](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k) on Hugging Face
 
 > **Note**: The fine-tuned model and training dataset are hosted on Hugging Face. You can download and use them directly from there. This repository contains the code and pipeline for reproducing the fine-tuning process.
+
+## Quick Start
+
+Get started with the fine-tuned model in just a few steps:
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run inference with default example
+python inference.py
+
+# Parse your own resume file
+python inference.py --resume_file path/to/resume.txt
+```
+
+The inference script automatically downloads:
+- Base model: `Qwen/Qwen3-0.6B` from Hugging Face
+- LoRA adapter: `sandeeppanem/qwen3-0.6b-resume-json` from Hugging Face
 
 ## Project Structure
 
@@ -26,6 +48,7 @@ Fine-tune Qwen3-0.6B base model for resume parsing using LoRA (Low-Rank Adaptati
 ├── select_resumes_by_title.py        # Preprocessing: Select resumes by job title
 ├── combine_resume_datasets.py        # Preprocessing: Merge datasets from 2 sources
 ├── convert_to_qwen3_dataset.py       # Convert extracted data to Qwen3 format
+├── inference.py                      # Standalone inference script (downloads model from HF)
 ├── requirements.txt                  # Python dependencies
 ├── LICENSE                           # Apache 2.0 License
 └── README.md                         # This file
@@ -250,6 +273,42 @@ To use the fine-tuned model manually:
 3. Generate with low temperature (0.1) for deterministic JSON output
 
 See the inference section in `notebooks/train_qwen3_resume_parser.ipynb` for complete examples.
+
+## Example Output
+
+Here's what the model produces when given a resume:
+
+**Input Resume:**
+```
+Senior IT Project Manager with 10+ years experience leading enterprise migrations. 
+Skills: Python, SQL, AWS, Agile. Location: Chicago, IL. 
+Experience: Project Manager at Acme Corp (2019-2024). 
+Education: MS Computer Science.
+```
+
+**Model Output (JSON):**
+```json
+{
+  "current_title": "Senior IT Project Manager",
+  "years_experience": 10,
+  "seniority": "senior",
+  "primary_domain": "IT Project Management",
+  "core_skills": ["Python", "SQL", "AWS", "Agile"],
+  "location": "Chicago, IL",
+  "current_company": "Acme Corp",
+  "education": "MS Computer Science"
+}
+```
+
+The model extracts structured information including:
+- Job titles (current and previous)
+- Companies
+- Years of experience
+- Skills (core and secondary)
+- Education
+- Location
+- Industries
+- And more...
 
 ## References
 
