@@ -1,0 +1,28 @@
+# Requirements for Qwen3 Resume Extraction Project
+
+# Core dependencies for dataset conversion script
+# These are required to run convert_to_qwen3_dataset.py locally
+transformers>=4.40.0
+tqdm>=4.66.0
+
+# Preprocessing dependencies
+pdfplumber>=0.10.0  # For extracting text from PDF files in combine_resume_datasets.py
+
+# Training dependencies (for Google Colab / training environment)
+# These are needed for the training notebook but not required for local dataset conversion
+peft>=0.8.0
+trl>=0.8.0
+datasets>=2.16.0
+accelerate>=0.28.0
+bitsandbytes>=0.41.0
+
+# Hugging Face Hub upload (for uploading dataset and model)
+huggingface_hub>=0.20.0
+
+# PyTorch (required for transformers and training)
+# Install appropriate version for your system:
+# CPU: pip install torch
+# CUDA 11.8: pip install torch --index-url https://download.pytorch.org/whl/cu118
+# CUDA 12.1: pip install torch --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0.0
+

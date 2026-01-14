@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Model outputs (models are on Hugging Face)
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.zip
+model/
+qwen3-resume-parser-lora/
+qwen3-resume-parser-lora-final/
+
+# Data outputs (keep source data, ignore generated)
+# Training dataset is on Hugging Face: sandeeppanem/resume-json-extraction-5k
+data/qwen3_training_dataset.jsonl
+
+# Large intermediate data files (optional - uncomment if you want to exclude them)
+# data/combined_resumes.json
+# data/extracted_resumes.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Progress files
+processing_progress.json
+
+
