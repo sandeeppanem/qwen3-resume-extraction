@@ -49,4 +49,7 @@ logs/
 # Progress files
 processing_progress.json
 
+# Utility scripts (not needed in repo)
+fix_notebooks.py
+
 
