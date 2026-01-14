@@ -229,7 +229,21 @@ For detailed dataset information, see [`data/dataset_card.md`](data/dataset_card
 
 ## Inference
 
-The training notebook includes inference examples. To use the fine-tuned model:
+⚠️ **This repository contains ONLY the LoRA adapter weights.** You must load the base model `Qwen/Qwen3-0.6B` separately.
+
+The training notebook includes inference examples. You can also run inference via the standalone script:
+
+```bash
+python inference.py
+```
+
+Parse a custom resume text file:
+
+```bash
+python inference.py --resume_file path/to/resume.txt
+```
+
+To use the fine-tuned model manually:
 
 1. Load the base model and LoRA adapter
 2. Use the Qwen3 chat template with `add_generation_prompt=True`
