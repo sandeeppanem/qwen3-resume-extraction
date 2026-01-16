@@ -1,0 +1,11 @@
+# Requirements for Docker deployment
+# llama-cpp-python is built from source in Dockerfile, so don't include it here
+
+# Gradio for web interface
+gradio>=4.0.0,<5.0.0
+
+# huggingface_hub: Pin to version with HfFolder (required by Gradio)
+# HfFolder was removed in huggingface_hub >= 0.23.0
+huggingface_hub>=0.20.0,<0.23.0
+
+

@@ -17,8 +17,8 @@ import os
 import argparse
 from pathlib import Path
 
-# Project root (directory containing this script)
-PROJECT_ROOT = Path(__file__).parent.absolute()
+# Project root (parent directory of scripts/)
+PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
 
 def convert_to_qwen3_messages(resume_text, extracted_json):

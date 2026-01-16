@@ -19,6 +19,9 @@ bitsandbytes>=0.41.0
 # Hugging Face Hub upload (for uploading dataset and model)
 huggingface_hub>=0.20.0
 
+# Gradio for web interface
+gradio>=4.0.0
+
 # PyTorch (required for transformers and training)
 # Install appropriate version for your system:
 # CPU: pip install torch

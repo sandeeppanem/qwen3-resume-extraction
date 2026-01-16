@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 import pdfplumber
 
-# Project root
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+# Project root (parent directory of scripts/)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Dataset paths
 DATASET1_ROOT = os.path.join(PROJECT_ROOT, "data", "resume_dataset", "data")

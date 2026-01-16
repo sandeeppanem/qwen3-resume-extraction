@@ -6,15 +6,23 @@ Fine-tune Qwen3-0.6B base model for resume parsing using LoRA (Low-Rank Adaptati
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-Model-yellow.svg)](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json)
 [![Hugging Face Datasets](https://img.shields.io/badge/🤗%20Datasets-Dataset-yellow.svg)](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k)
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Spaces-Demo-blue.svg)](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser)
 
 ## 🚀 Model & Dataset Links
 
+- **🚀 Live Demo**: [Try the Resume Parser](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser) on Hugging Face Spaces
 - **Fine-tuned Model**: [sandeeppanem/qwen3-0.6b-resume-json](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json) on Hugging Face
 - **Training Dataset**: [sandeeppanem/resume-json-extraction-5k](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k) on Hugging Face
 
-> **Note**: The fine-tuned model and training dataset are hosted on Hugging Face. You can download and use them directly from there. This repository contains the code and pipeline for reproducing the fine-tuning process.
+> **Note**: The fine-tuned model and training dataset are hosted on Hugging Face. You can download and use them directly from there. This repository contains the code and pipeline for reproducing the fine-tuning process. **Try the live demo** to see the model in action!
 
 ## Quick Start
+
+### 🚀 Try the Live Demo
+
+**The easiest way to try the model**: [**Try the Resume Parser**](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser) on Hugging Face Spaces - no installation required!
+
+### 💻 Run Locally
 
 Get started with the fine-tuned model in just a few steps:
 
@@ -22,11 +30,11 @@ Get started with the fine-tuned model in just a few steps:
 # Install dependencies
 pip install -r requirements.txt
 
-# Run inference with default example
-python inference.py
+# Run inference with default example (quick check with LoRA adapter)
+python notebooks/inference.py
 
 # Parse your own resume file
-python inference.py --resume_file path/to/resume.txt
+python notebooks/inference.py --resume_file path/to/resume.txt
 ```
 
 The inference script automatically downloads:
@@ -37,18 +45,29 @@ The inference script automatically downloads:
 
 ```
 .
-├── data/
+├── data/                              # Data files
 │   ├── combined_resumes.json          # Raw resume data (merged from 2 sources)
 │   ├── extracted_resumes.json        # Extracted structured data (resume → JSON pairs)
 │   ├── qwen3_training_dataset.jsonl  # Training dataset (Qwen3 chat template format)
 │   └── dataset_card.md                # Dataset documentation for Hugging Face
-├── notebooks/
+├── notebooks/                         # Training notebooks
 │   ├── generate_training_data.ipynb  # Generate training data pairs (resume → JSON)
-│   └── train_qwen3_resume_parser.ipynb  # Fine-tuning notebook (for Google Colab)
-├── select_resumes_by_title.py        # Preprocessing: Select resumes by job title
-├── combine_resume_datasets.py        # Preprocessing: Merge datasets from 2 sources
-├── convert_to_qwen3_dataset.py       # Convert extracted data to Qwen3 format
-├── inference.py                      # Standalone inference script (downloads model from HF)
+│   ├── train_qwen3_resume_parser.ipynb  # Fine-tuning notebook (for Google Colab)
+│   └── inference.py                  # Quick inference script for testing (uses LoRA adapter)
+├── scripts/                           # Data preprocessing scripts
+│   ├── select_resumes_by_title.py    # Select resumes by job title
+│   ├── combine_resume_datasets.py    # Merge datasets from multiple sources
+│   └── convert_to_qwen3_dataset.py   # Convert extracted data to Qwen3 format
+├── inference/                         # Model deployment scripts
+│   ├── merge_lora.py                 # Merge LoRA adapter into base model
+│   └── convert_to_gguf.py            # Convert merged model to GGUF format
+├── space/                            # Hugging Face Space deployment files
+│   ├── app.py                        # Gradio app using llama-cpp-python (GGUF)
+│   ├── test_local.py                 # Local testing script (mirrors app.py logic)
+│   ├── Dockerfile                    # Docker configuration for Spaces
+│   ├── requirements.txt              # Minimal dependencies for Space
+│   ├── README.md                     # Space-specific documentation
+│   └── qwen3-resume-parser-Q5_K_M.gguf  # Quantized model file
 ├── requirements.txt                  # Python dependencies
 ├── LICENSE                           # Apache 2.0 License
 └── README.md                         # This file
@@ -64,7 +83,7 @@ The project follows this workflow to create training data and fine-tune the mode
 
 **1.1 Select Resumes by Job Title** (from GitHub Resume Corpus):
 ```bash
-python select_resumes_by_title.py \
+python scripts/select_resumes_by_title.py \
     --corpus_dir data/resumes_corpus \
     --output_dir data/selected_resumes \
     --num_per_title 300
@@ -74,7 +93,7 @@ python select_resumes_by_title.py \
 
 **1.2 Combine Datasets** (merge from 2 sources):
 ```bash
-python combine_resume_datasets.py \
+python scripts/combine_resume_datasets.py \
     --dataset1 data/resume_dataset/data \
     --dataset2 data/selected_resumes \
     --output data/combined_resumes.json
@@ -95,7 +114,7 @@ python combine_resume_datasets.py \
 
 **3.1 Convert to Qwen3 Chat Template**:
 ```bash
-python convert_to_qwen3_dataset.py
+python scripts/convert_to_qwen3_dataset.py
 ```
 - Converts `extracted_resumes.json` to Qwen3 chat template format
 - Outputs `data/qwen3_training_dataset.jsonl` ready for fine-tuning
@@ -144,12 +163,12 @@ If starting from raw data sources, run these preprocessing steps:
 
 ```bash
 # Step 1: Select resumes by job title (from GitHub corpus)
-python select_resumes_by_title.py \
+python scripts/select_resumes_by_title.py \
     --corpus_dir data/resumes_corpus \
     --output_dir data/selected_resumes
 
 # Step 2: Combine datasets from both sources
-python combine_resume_datasets.py \
+python scripts/combine_resume_datasets.py \
     --dataset1 data/resume_dataset/data \
     --dataset2 data/selected_resumes \
     --output data/combined_resumes.json
@@ -170,10 +189,10 @@ Use `notebooks/generate_training_data.ipynb` to extract structured information:
 
 ```bash
 # Convert extracted_resumes.json to Qwen3 training format
-python convert_to_qwen3_dataset.py
+python scripts/convert_to_qwen3_dataset.py
 
 # Or specify custom paths
-python convert_to_qwen3_dataset.py \
+python scripts/convert_to_qwen3_dataset.py \
     --input data/extracted_resumes.json \
     --output data/qwen3_training_dataset.jsonl \
     --model Qwen/Qwen3-0.6B
@@ -257,14 +276,17 @@ For detailed dataset information, see [`data/dataset_card.md`](data/dataset_card
 The training notebook includes inference examples. You can also run inference via the standalone script:
 
 ```bash
-python inference.py
+# Quick inference check (uses LoRA adapter, downloads from Hugging Face)
+python notebooks/inference.py
 ```
 
 Parse a custom resume text file:
 
 ```bash
-python inference.py --resume_file path/to/resume.txt
+python notebooks/inference.py --resume_file path/to/resume.txt
 ```
+
+**Note**: For production deployment with GGUF (faster CPU inference), see the [CPU Optimization](#cpu-optimization-with-gguf) section below. Or **try the live demo** at [https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser)!
 
 To use the fine-tuned model manually:
 
@@ -273,6 +295,88 @@ To use the fine-tuned model manually:
 3. Generate with low temperature (0.1) for deterministic JSON output
 
 See the inference section in `notebooks/train_qwen3_resume_parser.ipynb` for complete examples.
+
+## CPU Optimization with GGUF
+
+> **🚀 Live Demo Available**: Try the optimized model at [https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser) - no setup required!
+
+For faster CPU inference (especially on Hugging Face Spaces), you can convert the merged model to GGUF format with quantization. This provides **7-15x faster inference** compared to using transformers directly.
+
+### Performance Comparison
+
+- **Transformers (CPU)**: ~77 seconds per request
+- **GGUF Q5_K_M (CPU)**: ~5-10 seconds per request
+- **Improvement**: 7-15x faster
+
+### Conversion Process
+
+**Step 1: Merge LoRA Adapter**
+
+First, merge the LoRA adapter into the base model:
+
+```bash
+python inference/merge_lora.py
+```
+
+This creates a merged model in `merged_model/` directory.
+
+**Step 2: Convert to GGUF and Quantize**
+
+Convert the merged model to GGUF format and quantize:
+
+```bash
+python inference/convert_to_gguf.py \
+    --input_dir merged_model \
+    --quantization Q5_K_M
+```
+
+This will:
+1. Clone llama.cpp repository (if needed)
+2. Convert merged model to GGUF format
+3. Build llama.cpp tools
+4. Quantize to Q5_K_M format (~400-500MB)
+
+The quantized model will be saved to `gguf/qwen3-resume-parser-Q5_K_M.gguf`.
+
+### Deployment to Hugging Face Spaces
+
+The `space/` directory contains files optimized for GGUF deployment:
+
+- `space/app.py` - Gradio app using llama-cpp-python
+- `space/requirements.txt` - Minimal dependencies (no transformers)
+- `space/README.md` - Space-specific documentation
+
+**Deployment Steps:**
+
+1. Copy the quantized GGUF file to your Space repository:
+   ```bash
+   cp gguf/qwen3-resume-parser-Q5_K_M.gguf /path/to/space/
+   ```
+
+2. Copy Space files:
+   ```bash
+   cp space/app.py /path/to/space/
+   cp space/requirements.txt /path/to/space/
+   cp space/README.md /path/to/space/
+   ```
+
+3. If the GGUF file is >100MB, use Git LFS:
+   ```bash
+   git lfs track "*.gguf"
+   git add qwen3-resume-parser-Q5_K_M.gguf
+   ```
+
+4. Push to your Space repository
+
+See [`DEPLOY_SPACE.md`](DEPLOY_SPACE.md) for detailed deployment instructions.
+
+### Quantization Options
+
+- **Q5_K_M** (recommended): Best balance for 16GB RAM, high quality, ~400-500MB
+- **Q4_K_M**: Smaller size, slightly lower quality, ~300-400MB
+- **Q6_K**: Higher quality, larger size, ~500-600MB
+
+For Hugging Face Spaces with 16GB RAM, Q5_K_M is the recommended choice.
 
 ## Example Output
 

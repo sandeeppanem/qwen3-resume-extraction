@@ -23,6 +23,11 @@ model/
 qwen3-resume-parser-lora/
 qwen3-resume-parser-lora-final/
 
+# Merged model and GGUF conversion outputs
+merged_model/
+gguf/
+llama.cpp/
+
 # Data outputs (keep source data, ignore generated)
 # Training dataset is on Hugging Face: sandeeppanem/resume-json-extraction-5k
 data/qwen3_training_dataset.jsonl
@@ -51,5 +56,15 @@ processing_progress.json
 
 # Utility scripts (not needed in repo)
 fix_notebooks.py
+app_transformers_old.py
+
+# Temporary documentation files
+DEPLOY_SPACE.md
+README_SPACE.md
+ORGANIZATION.md
+PATH_VERIFICATION.md
+
+# Weird files that shouldn't be committed
+=*
 
 
