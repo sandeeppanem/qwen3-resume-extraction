@@ -7,9 +7,11 @@ Uses llama-cpp-python for fast CPU inference.
 """
 
 import gradio as gr
+import hashlib
 import json
 import os
 import re
+from collections import OrderedDict
 from pathlib import Path
 
 # Model configuration
@@ -19,6 +21,11 @@ MODEL_PATH = "qwen3-resume-parser-Q5_K_M.gguf"
 
 # Global variables for model caching
 _model = None
+
+# Shared result cache (key: hash of resume text, value: (formatted_json, raw_output))
+# Using OrderedDict for FIFO eviction when cache is full
+_result_cache = OrderedDict()
+MAX_CACHE_SIZE = 100  # Keep last 100 results
 
 
 def format_qwen3_prompt(resume_text: str) -> str:
@@ -102,7 +109,7 @@ def load_model():
             n_batch=128,  # Reduced from 512 for faster processing
             n_gpu_layers=0,
             chat_format=None,  # Disable chat format parsing for speed
-            verbose=True,
+            verbose=False,
         )
         print("✓ Model loaded with optimized parameters")
         
@@ -163,18 +170,32 @@ def parse_resume_stream(resume_text: str):
         yield "⚠️ Please provide resume text.", ""
         return
     
+    # Normalize resume text for caching (strip whitespace)
+    normalized_text = resume_text.strip()
+    
+    # Create hash key for cache lookup
+    cache_key = hashlib.md5(normalized_text.encode('utf-8')).hexdigest()
+    
+    # Check cache first
+    if cache_key in _result_cache:
+        # Move to end (most recently used) for LRU-like behavior
+        cached_json, cached_raw = _result_cache.pop(cache_key)
+        _result_cache[cache_key] = (cached_json, cached_raw)
+        yield cached_json, cached_raw
+        return
+    
     try:
         model = load_model()
         
         MAX_RESUME_CHARS = 4000
-        if len(resume_text) > MAX_RESUME_CHARS:
-            truncated = resume_text[:MAX_RESUME_CHARS]
+        if len(normalized_text) > MAX_RESUME_CHARS:
+            truncated = normalized_text[:MAX_RESUME_CHARS]
             last_space = truncated.rfind(' ', MAX_RESUME_CHARS - 200, MAX_RESUME_CHARS)
             if last_space > MAX_RESUME_CHARS - 500:
                 truncated = truncated[:last_space]
-            resume_text = truncated + "..."
+            normalized_text = truncated + "..."
         
-        prompt = format_qwen3_prompt(resume_text)
+        prompt = format_qwen3_prompt(normalized_text)
         accumulated_text = ""
         
         stream = model(
@@ -187,30 +208,39 @@ def parse_resume_stream(resume_text: str):
         )
         
         # Process streamed tokens
+        final_json = None
+        final_raw = None
+        chunk_count = 0
+        
         for chunk in stream:
             if "choices" in chunk and len(chunk["choices"]) > 0:
                 delta = chunk["choices"][0].get("text", "")
                 if delta:
                     accumulated_text += delta
+                    chunk_count += 1
                     
-                    cleaned_text = accumulated_text
-                    cleaned_text = re.sub(r'<think>.*?</think>', '', cleaned_text, flags=re.DOTALL)
-                    cleaned_text = re.sub(r'<think>.*?</think>', '', cleaned_text, flags=re.DOTALL)
-                    cleaned_text = re.sub(r'</?redacted_reasoning>', '', cleaned_text)
-                    cleaned_text = re.sub(r'</?think>', '', cleaned_text)
-                    cleaned_text = re.sub(r'\n\s*\n+', '\n', cleaned_text)
-                    cleaned_text = cleaned_text.strip()
-                    
-                    try:
-                        parsed_json = json.loads(cleaned_text)
-                        formatted_json = json.dumps(parsed_json, indent=2, ensure_ascii=False)
-                        yield formatted_json, cleaned_text
-                    except json.JSONDecodeError:
-                        formatted_incomplete = _format_incomplete_json(cleaned_text)
-                        yield formatted_incomplete, cleaned_text
+                    # Only do expensive operations every 5 chunks or if we have enough text
+                    # This reduces overhead during streaming
+                    if chunk_count % 5 == 0 or len(accumulated_text) > 50:
+                        cleaned_text = accumulated_text
+                        cleaned_text = re.sub(r'<think>.*?</think>', '', cleaned_text, flags=re.DOTALL)
+                        cleaned_text = re.sub(r'</?redacted_reasoning>', '', cleaned_text)
+                        cleaned_text = re.sub(r'</?think>', '', cleaned_text)
+                        cleaned_text = re.sub(r'\n\s*\n+', '\n', cleaned_text)
+                        cleaned_text = cleaned_text.strip()
+                        
+                        try:
+                            parsed_json = json.loads(cleaned_text)
+                            formatted_json = json.dumps(parsed_json, indent=2, ensure_ascii=False)
+                            final_json = formatted_json
+                            final_raw = cleaned_text
+                            yield formatted_json, cleaned_text
+                        except json.JSONDecodeError:
+                            formatted_incomplete = _format_incomplete_json(cleaned_text)
+                            yield formatted_incomplete, cleaned_text
         
+        # Final processing after stream completes
         assistant_response = accumulated_text.strip()
-        assistant_response = re.sub(r'<think>.*?</think>', '', assistant_response, flags=re.DOTALL)
         assistant_response = re.sub(r'<think>.*?</think>', '', assistant_response, flags=re.DOTALL)
         assistant_response = re.sub(r'</?redacted_reasoning>', '', assistant_response)
         assistant_response = re.sub(r'</?think>', '', assistant_response)
@@ -220,12 +250,25 @@ def parse_resume_stream(resume_text: str):
         try:
             parsed_json = json.loads(assistant_response)
             formatted_json = json.dumps(parsed_json, indent=2, ensure_ascii=False)
+            final_json = formatted_json
+            final_raw = assistant_response
             yield formatted_json, assistant_response
         except json.JSONDecodeError:
             yield (
                 f"⚠️ Model output is not valid JSON:\n\n{assistant_response}",
                 assistant_response,
             )
+            return  # Don't cache invalid JSON
+        
+        # Cache the result for future users (only if we got valid JSON)
+        if final_json and final_raw:
+            # Enforce cache size limit (FIFO eviction)
+            if len(_result_cache) >= MAX_CACHE_SIZE:
+                # Remove oldest entry (first item in OrderedDict)
+                _result_cache.popitem(last=False)
+            
+            # Add new result to cache
+            _result_cache[cache_key] = (final_json, final_raw)
     
     except Exception as e:
         yield f"❌ Error: {str(e)}", ""
@@ -270,6 +313,7 @@ def create_interface():
             
             **Model:** [sandeeppanem/qwen3-0.6b-resume-json](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json)  
             **Dataset:** [sandeeppanem/resume-json-extraction-5k](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k)  
+            **Repository:** [qwen3-resume-extraction](https://github.com/sandeeppanem/qwen3-resume-extraction)  
             **Format:** GGUF Q5_K_M (optimized for CPU)
             """
         )

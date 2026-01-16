@@ -41,6 +41,15 @@ The inference script automatically downloads:
 - Base model: `Qwen/Qwen3-0.6B` from Hugging Face
 - LoRA adapter: `sandeeppanem/qwen3-0.6b-resume-json` from Hugging Face
 
+## ✨ Key Features
+
+- **🚀 Zero API Costs**: Runs entirely locally with no external API dependencies. No OpenAI, Anthropic, or Gemini API keys required.
+- **⚡ CPU-Optimized**: Uses GGUF quantization for fast CPU inference (7-15x faster than standard Transformers)
+- **📦 Open Source**: Complete pipeline including training code, model weights, and dataset
+- **🎯 Specialized Model**: Fine-tuned specifically for resume parsing with high accuracy
+- **🔧 Easy Deployment**: Ready-to-use Gradio interface and Docker configuration for Hugging Face Spaces
+- **💾 Efficient Training**: LoRA fine-tuning enables domain adaptation with minimal computational resources
+
 ## Project Structure
 
 ```
