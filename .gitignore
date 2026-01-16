@@ -28,6 +28,10 @@ merged_model/
 gguf/
 llama.cpp/
 
+# Large GGUF model file (424MB) - use Git LFS in Space repository
+space/qwen3-resume-parser-Q5_K_M.gguf
+*.gguf
+
 # Data outputs (keep source data, ignore generated)
 # Training dataset is on Hugging Face: sandeeppanem/resume-json-extraction-5k
 data/qwen3_training_dataset.jsonl
