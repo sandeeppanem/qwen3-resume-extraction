@@ -45,9 +45,17 @@ This Space uses:
 
 The GGUF model file (`qwen3-resume-parser-Q5_K_M.gguf`) should be included in this Space repository (use Git LFS if >100MB).
 
+## Performance
+
+- **Previous (transformers)**: ~77 seconds per request on CPU
+- **Current (GGUF Q5_K_M)**: ~5-10 seconds per request on CPU
+- **Improvement**: 7-15x faster
+- **Model Size**: ~400-500MB (Q5_K_M quantization)
+
 ## Links
 
-- **🚀 Live Demo**: [Try the Resume Parser](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser) (this Space)
+- **🚀 Live Demo (CPU)**: [Try the Resume Parser](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser) (this Space)
+- **🚀 Live Demo (GPU)**: [Try the Resume Parser (GPU)](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser-fast) - Faster GPU version
 - **📦 Model**: [sandeeppanem/qwen3-0.6b-resume-json](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json)
 - **📊 Dataset**: [sandeeppanem/resume-json-extraction-5k](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k)
 - **💻 Repository**: [qwen3-resume-extraction](https://github.com/sandeeppanem/qwen3-resume-extraction)

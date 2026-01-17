@@ -32,6 +32,23 @@ This will:
 
 The quantized model will be saved to `gguf/qwen3-resume-parser-Q5_K_M.gguf`.
 
+### `test_local.py`
+Local testing script for the GGUF model. Runs a Gradio UI server with streaming enabled, mirroring the exact logic of `space/app.py`.
+
+**Usage:**
+```bash
+# Start local Gradio server
+python inference/test_local.py
+```
+
+This will:
+- Start a local server on `http://localhost:7860`
+- Create a public link for easy access
+- Provide a web UI where you can paste resume text
+- Enable streaming output to see JSON being generated in real-time
+
+**Note:** The script automatically looks for the GGUF model in `gguf/qwen3-resume-parser-Q5_K_M.gguf` at the project root.
+
 ## Workflow
 
 1. **Merge LoRA**: Run `merge_lora.py` to create a merged model

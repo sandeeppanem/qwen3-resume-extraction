@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-Gradio app for Qwen3 Resume Parser using llama.cpp (GGUF format).
+Gradio app for Qwen3 Resume Parser - CPU-Optimized Deployment.
 
-Optimized for CPU inference with GGUF quantized model.
-Uses llama-cpp-python for fast CPU inference.
+This app is optimized for CPU inference using GGUF format with Q5_K_M quantization.
+Deployed on Hugging Face Spaces (CPU tier) for cost-effective resume parsing.
+
+Features:
+- Fast CPU inference using llama-cpp-python (7-15x faster than Transformers)
+- Streaming output for real-time JSON generation
+- Result caching for improved performance
+- Optimized for Hugging Face Spaces CPU instances
+
+Live Demo: https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser
 """
 
 import gradio as gr
@@ -314,7 +322,8 @@ def create_interface():
             **Model:** [sandeeppanem/qwen3-0.6b-resume-json](https://huggingface.co/sandeeppanem/qwen3-0.6b-resume-json)  
             **Dataset:** [sandeeppanem/resume-json-extraction-5k](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k)  
             **Repository:** [qwen3-resume-extraction](https://github.com/sandeeppanem/qwen3-resume-extraction)  
-            **Format:** GGUF Q5_K_M (optimized for CPU)
+            **Format:** GGUF Q5_K_M (optimized for CPU)  
+            **🚀 GPU Version:** [Try the faster GPU version](https://huggingface.co/spaces/sandeeppanem/qwen3-resume-parser-fast) (NVIDIA T4)
             """
         )
         
@@ -523,6 +532,4 @@ University of Texas at Austin | 2020"""
 
 if __name__ == "__main__":
     demo = create_interface()
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=True)
-
-
+    demo.launch(server_name="0.0.0.0", server_port=7860)

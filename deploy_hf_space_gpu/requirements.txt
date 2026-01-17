@@ -1,0 +1,19 @@
+# Requirements for GPU deployment on Hugging Face Spaces
+# Optimized for NVIDIA T4 GPU with 8-bit quantization
+
+# Gradio for web interface
+gradio>=4.0.0,<5.0.0
+
+# Transformers and model dependencies
+transformers>=4.40.0
+torch>=2.0.0
+bitsandbytes>=0.41.0  # For 8-bit quantization on GPU
+peft>=0.6.0  # For LoRA adapter loading
+
+# Hugging Face Hub (newer version for peft compatibility)
+# GPU deployment doesn't need the old HfFolder workaround
+huggingface_hub>=0.25.0,<2.0.0
+
+# Accelerate for device management
+accelerate>=0.20.0
+
