@@ -48,6 +48,8 @@ The inference script automatically downloads:
 
 ## ✨ Key Features
 
+- **📊 Training Dataset Creation**: Curated and processed 5K diverse resume samples with structured JSON extraction. 
+**Key contribution** - the dataset is available on [Hugging Face Datasets](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k) for others to use and train their own models.
 - **🚀 Zero API Costs**: Runs entirely locally with no external API dependencies. No OpenAI, Anthropic, or Gemini API keys required.
 - **⚡ Dual Deployment Options**: 
   - **CPU-Optimized**: GGUF quantization for fast CPU inference (7-15x faster than standard Transformers)
@@ -256,6 +258,8 @@ The initial raw resume dataset was created by merging data from two sources:
 These datasets were combined and processed to create `data/combined_resumes.json`, which was then used to extract structured information and generate the training dataset.
 
 ## Dataset Format
+
+> **📊 Dataset Available on Hugging Face**: The complete training dataset (5K samples) is available on [Hugging Face Datasets](https://huggingface.co/datasets/sandeeppanem/resume-json-extraction-5k). You can download and use it directly to train your own models or for research purposes.
 
 The training dataset (`qwen3_training_dataset.jsonl`) contains examples in the following format:
 
